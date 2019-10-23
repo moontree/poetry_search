@@ -131,7 +131,6 @@
             let tmp = [];
             let condition = conditions[i];
             let f_query = parse_query(condition);
-            console.log(f_query);
             if(f_query[1].length > 0) { // need filter
                 for (let j = 0; j < result.length; j++) {
                     let item = result[j];
@@ -143,7 +142,6 @@
             }
 
         }
-        console.log(result);
         return result;
     }
 
@@ -158,8 +156,6 @@
         if(filter_target){
             filter_target = filter_target.trim().split(/\s+/);
         }
-        console.log('query', str,  filter_op, filter_target);
-
         return [filter_op, filter_target || []];
     };
 
@@ -169,7 +165,6 @@
 
     function generate_row(item) {
         let str = "<tr>";
-        // console.log(arguments);
         for(let i = 0; i < conditions.length; i ++){
             str += "<td>" + (item[conditions[i]] || "").replace(/\n/g, '<br>') + "</td>";
         }
@@ -187,7 +182,6 @@
     };
 
     function query(){
-        alert('query');
         clear_table();
         let data = filter_query();
         update(data);
