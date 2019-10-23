@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>古诗词</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">-->
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/meta.js"></script>
+    <!--<link href="css/bootstrap.css"></link>-->
+    <!--<link href="css/bootstrap-grid.css"></link>-->
+</head>
+<body>
+    <br>
+    <h1 class="text-center">古诗词查找</h1>
+    <div style="padding: 20px 50px 10px;">
+        <h2>查询条件</h2>
+        <p>
+            <label>题目</label>
+            <select id="title_op">
+                <option selected value="equal">等于</option>
+                <option value="exact_in">在..里面(精确模式）</option>
+                <option value="exact_not_in">不在..里面（精确模式）</option>
+                <option value="have_either">包含某个</option>
+                <option value="have_all">包含所有</option>
+                <option value="not_have_all">不包含任何</option>
+            </select>
+            <input id="title_text"  placeholder="多个用空格分隔">
+        </p>
+        <p>
+            <label>正文</label>
+            <select id="main_op">
+                <option selected value="equal">等于</option>
+                <option value="exact_in">在..里面(精确模式）</option>
+                <option value="exact_not_in">不在..里面（精确模式）</option>
+                <option value="have_either">包含某个</option>
+                <option value="have_all">包含所有</option>
+                <option value="not_have_all">不包含任何</option>
+            </select>
+            <input id="main_text"  placeholder="多个用空格分隔">
+        </p>
+        <p>
+            <label>作者</label>
+            <select id="author_op">
+                <option selected value="equal">等于</option>
+                <option value="exact_in">在..里面(精确模式）</option>
+                <option value="exact_not_in">不在..里面（精确模式）</option>
+                <option value="have_either">包含某个</option>
+                <option value="have_all">包含所有</option>
+                <option value="not_have_all">不包含任何</option>
+            </select>
+            <input id="author_text" placeholder="多个用空格分隔">
+        </p>
+         <p>
+            <label>朝代</label>
+            <select id="dynasty_op">
+                <option selected value="equal">等于</option>
+                <option value="exact_in">在..里面(精确模式）</option>
+                <option value="exact_not_in">不在..里面（精确模式）</option>
+                <option value="have_either">包含某个</option>
+                <option value="have_all">包含所有</option>
+                <option value="not_have_all">不包含任何</option>
+            </select>
+            <input id="dynasty_text" placeholder="多个用空格分隔">
+        </p>
+        <p>
+            <label>年级</label>
+            <select id="grade_op">
+                <option selected value="equal">等于</option>
+                <option value="exact_in">在..里面(精确模式）</option>
+                <option value="exact_not_in">不在..里面（精确模式）</option>
+                <option value="have_either">包含某个</option>
+                <option value="have_all">包含所有</option>
+                <option value="not_have_all">不包含任何</option>
+            </select>
+            <input id="grade_text" placeholder="多个用空格分隔">
+        </p>
+        <p>
+            <label>册数</label>
+            <select id="seq_id_op">
+                <option selected value="equal">等于</option>
+                <option value="exact_in">在..里面(精确模式）</option>
+                <option value="exact_not_in">不在..里面（精确模式）</option>
+                <option value="have_either">包含某个</option>
+                <option value="have_all">包含所有</option>
+                <option value="not_have_all">不包含任何</option>
+            </select>
+            <input id="seq_id_text" placeholder="多个用空格分隔">
+        </p>
+        <p>
+            <label>备注</label>
+            <select id="comment_op">
+                <option selected value="equal">等于</option>
+                <option value="exact_in">在..里面(精确模式）</option>
+                <option value="exact_not_in">不在..里面（精确模式）</option>
+                <option value="have_either">包含某个</option>
+                <option value="have_all">包含所有</option>
+                <option value="not_have_all">不包含任何</option>
+            </select>
+            <input id="comment_text" placeholder="多个用空格分隔">
+        </p>
+        <button onclick='query()'>查询</button>
+    </div>
+    <HR style="border: 3px double #987cb9">
+    <div style="padding: 20px 50px 10px;">
+        <table class="table table-bordered table-hover">
+        <thead>
+            <th>题目</th>
+            <th>正文</th>
+            <th>作者</th>
+            <th>朝代</th>
+            <th>年级</th>
+            <th>册数</th>
+            <th>备注</th>
+        </thead>
+        <tbody id="content_tb"></tbody>
+    </table>
+    </div>
+
+</body>
+<script type="text/javascript">
+
+    var conditions = ["title", "main", "author", "dynasty", "grade", "seq_id", "comment"];
+
+    function filter_query(){
+        let result = [...all_indexes];
+        for(let i = 0; i < conditions.length; i ++){
+            let tmp = [];
+            let condition = conditions[i];
+            let f_query = parse_query(condition);
+            console.log(f_query);
+            if(f_query[1].length > 0) { // need filter
+                for (let j = 0; j < result.length; j++) {
+                    let item = result[j];
+                    if (filter(f_query[0], contents[item][condition] || "", f_query[1])) {
+                        tmp.push(item);
+                    }
+                }
+                result = [...tmp];
+            }
+
+        }
+        console.log(result);
+        return result;
+    }
+
+    /**
+     *
+     * @param str
+     * return op, target
+     */
+    function parse_query(str){
+        let filter_op = $('#' + str + '_op ' + 'option:selected').val();
+        let filter_target = $('#' + str + '_text').val();
+        if(filter_target){
+            filter_target = filter_target.trim().split(/\s+/);
+        }
+        console.log('query', str,  filter_op, filter_target);
+
+        return [filter_op, filter_target || []];
+    };
+
+    function clear_table(){
+        $('tbody tr').remove();
+    }
+
+    function generate_row(item) {
+        let str = "<tr>";
+        // console.log(arguments);
+        for(let i = 0; i < conditions.length; i ++){
+            str += "<td>" + (item[conditions[i]] || "").replace(/\n/g, '<br>') + "</td>";
+        }
+        str += "</tr>";
+        return str;
+    }
+
+    var table = $('#content_tb');
+    function update(data){
+        for (let i = 0; i < data.length; i ++){
+            let item = contents[data[i]];
+            var newRow = generate_row(item);
+            table.append(newRow)
+        };
+    };
+
+    function query(){
+        alert('query');
+        clear_table();
+        let data = filter_query();
+        update(data);
+    };
+
+    $(document).ready(function() {
+        update(all_indexes);
+    });
+</script>
+</html>
