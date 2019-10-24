@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <title>古诗词</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="js/jquery-3.4.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-    <script src="js/bootstrap-table.min.js"></script>
-
-    <script src="js/utils.js"></script>
-    <script src="js/meta.js"></script>
-
+	<!--<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">-->
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/bootstrap-table.min.css">
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap-table.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/meta.js"></script>
+    <!--<link href="css/bootstrap.css"></link>-->
+    <!--<link href="css/bootstrap-grid.css"></link>-->
 </head>
 <body>
     <br>
@@ -108,13 +108,31 @@
     </div>
     <HR style="border: 3px double #987cb9">
     <div style="padding: 20px 50px 10px;">
-        <table id="result_tb"  class="flex-nowrap" width="100%"  style="table-layout:fixed"> </table>
+        <table id="result_tb" class="bootstrap-table table-bordered table-hover" width="100%"  style="table-layout:fixed">
+        <thead>
+            <th width="100px">题目</th>
+            <th width="50px">作者</th>
+            <th width="50px">朝代</th>
+            <th width="400px">正文</th>
+            <th width="40px">年级</th>
+            <th width="40px">册数</th>
+            <th width="40px">单元</th>
+            <th width="40px">课</th>
+            <th width="120px">课程题目</th>
+            <th width="100px">出处</th>
+            <th width="100px">注解</th>
+            <th width="100px">备注</th>
+        </thead>
+        <tbody id="content_tb"></tbody>
+    </table>
     </div>
 
 </body>
 <script type="text/javascript">
 
     var conditions = ["title", "main", "author", "dynasty", "grade", "seq_id", "comment"];
+    var keys = ['title', 'author', 'dynasty', 'main', 'grade', 'seq_id', 'unit_num',
+        'class_id', 'class_title', 'reference', 'annotate', 'comment'];
 
     function filter_query(){
         let result = [...all_indexes];
@@ -126,8 +144,7 @@
                 for (let j = 0; j < result.length; j++) {
                     let item = result[j];
                     if (filter(f_query[0], contents[item][condition] || "", f_query[1])) {
-                        // tmp.push(item);
-                        tmp.push(contents[item]);
+                        tmp.push(item);
                     }
                 }
                 result = [...tmp];
@@ -151,76 +168,41 @@
         return [filter_op, filter_target || []];
     };
 
+    function clear_table(){
+        $('tbody tr').remove();
+    }
 
-    var table_data = [...contents];
-    var result_table = $('#result_tb');
-    function query(){
-        // clear_table();
-        result_table.bootstrapTable('removeAll');
-        table_data = filter_query();
-        // console.log(table_data);
-        result_table.bootstrapTable('append', table_data);
+    function generate_row(item) {
+        let str = "<tr>";
+        for(let i = 0; i < keys.length; i ++){
+            str += "<td>" + (item[keys[i]] || "").replace(/\n/g, '<br>') + "</td>";
+        }
+        str += "</tr>";
+        return str;
+    }
+
+    var table = $('#content_tb');
+    function update(data){
+        for (let i = 0; i < data.length; i ++){
+            let item = contents[data[i]];
+            var newRow = generate_row(item);
+            table.append(newRow)
+        };
     };
 
-    function init_table(){
-        result_table.bootstrapTable({
-            showColumns: true,
-            columns: [
-                {
-                    "field": "title",
-                    "title": "题目",
-                    "width": "100px",
-                }, {
-                    "field": "author",
-                    "title": "作者",
-                    "width": "50px"
-                }, {
-                    "field": "dynasty",
-                    "title": "朝代",
-                    "width": "50px"
-                }, {
-                    "field": "main",
-                    "title": "正文",
-                    "width": "400px"
-                }, {
-                    "field": "grade",
-                    "title": "年级",
-                    "width": "50px"
-                }, {
-                    "field": "seq_id",
-                    "title": "册数",
-                    "width": "50px"
-                }, {
-                    "field": "unit_num",
-                    "title": "单元",
-                    "width": "50px"
-                }, {
-                    "field": "class_id",
-                    "title": "课",
-                    "width": "50px"
-                }, {
-                    "field": "class_title",
-                    "title": "课题",
-                    "width": "120px"
-                }, {
-                    "field": "reference",
-                    "title": "出处",
-                    "width": "100px"
-                }, {
-                    "field": "annotate",
-                    "title": "注解",
-                    "width": "100px"
-                }, {
-                    "field": "comment",
-                    "title": "备注",
-                    "width": "100px"
-                }
-            ],
-            data: table_data
-        });
-    }
+    function query(){
+        clear_table();
+        let data = filter_query();
+        update(data);
+    };
+
     $(document).ready(function() {
-        init_table();
+        update(all_indexes);
+        // $('#result_tb').bootstrapTable({
+        //     sortable: true,                     //是否启用排序
+        //     sortOrder: "asc",                   //排序方式
+        //     showColumns: true
+        // });
     });
 </script>
 </html>
