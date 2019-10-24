@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<!--<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">-->
 	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap-table.min.css">
     <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap-table.min.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/meta.js"></script>
@@ -106,14 +108,19 @@
     </div>
     <HR style="border: 3px double #987cb9">
     <div style="padding: 20px 50px 10px;">
-        <table class="table table-bordered table-hover">
+        <table id="result_tb" class="bootstrap-table table-bordered table-hover">
         <thead>
             <th>题目</th>
-            <th>正文</th>
             <th>作者</th>
             <th>朝代</th>
+            <th>正文</th>
             <th>年级</th>
             <th>册数</th>
+            <th>单元</th>
+            <th>第几课</th>
+            <th>课程题目</th>
+            <th>出处</th>
+            <th>注解</th>
             <th>备注</th>
         </thead>
         <tbody id="content_tb"></tbody>
@@ -124,6 +131,8 @@
 <script type="text/javascript">
 
     var conditions = ["title", "main", "author", "dynasty", "grade", "seq_id", "comment"];
+    var keys = ['title', 'author', 'dynasty', 'main', 'grade', 'seq_id', 'unit_num',
+        'class_id', 'class_title', 'reference', 'annotate', 'comment'];
 
     function filter_query(){
         let result = [...all_indexes];
@@ -165,8 +174,8 @@
 
     function generate_row(item) {
         let str = "<tr>";
-        for(let i = 0; i < conditions.length; i ++){
-            str += "<td>" + (item[conditions[i]] || "").replace(/\n/g, '<br>') + "</td>";
+        for(let i = 0; i < keys.length; i ++){
+            str += "<td>" + (item[keys[i]] || "").replace(/\n/g, '<br>') + "</td>";
         }
         str += "</tr>";
         return str;
@@ -189,6 +198,11 @@
 
     $(document).ready(function() {
         update(all_indexes);
+        // $('#result_tb').bootstrapTable({
+        //     sortable: true,                     //是否启用排序
+        //     sortOrder: "asc",                   //排序方式
+        //     showColumns: true
+        // });
     });
 </script>
 </html>
