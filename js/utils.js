@@ -1,55 +1,58 @@
 function fn_equal(source, target) {
     for(let i in target){
         if(source === target[i]){
-            return true;
+            let new_str = source.replace(new RegExp(target[i], 'g'), '<strong style="background:yellow">' + target[i] + '</strong>');
+            return [true, new_str];
         }
     }
-    return false;
+    return [false, ''];
 }
 
 function fn_have_all(source, target){
+    let new_str = source;
     for(let i in target){
+        new_str = new_str.replace(new RegExp(target[i], 'g'), '<strong style="background:yellow">' + target[i] + '</strong>');
         if(source.indexOf(target[i]) === -1){
-            return false;
+            return [false, ''];
         }
     }
-    return true;
+    return [true, new_str];
 }
 
 function fn_exact_in(source, target){
     for(let i in target){
-        if(target[i] === source){
-            return true;
-        }
+        let new_str = source.replace(new RegExp(target[i], 'g'), '<strong style="background:yellow">' + target[i] + '</strong>');
+        return [true, new_str];
     }
-    return false;
+    return [false, ''];
 }
 
 function fn_exact_not_in(source, target){
     for(let i in target){
         if(target[i] === source){
-            return false;
+            return [false, ''];
         }
     }
-    return true;
+    return [true, source];
 }
 
 function fn_have_either(source, target){
     for(let i in target){
         if(source.indexOf(target[i]) > -1){
-            return true;
+            let new_str = source.replace(new RegExp(target[i], 'g'), '<strong style="background:yellow">' + target[i] + '</strong>');
+            return [true, new_str];
         }
     }
-    return false;
+    return [false, ''];
 }
 
 function fn_not_have_all(source, target){
     for(let i in target){
         if(source.indexOf(target[i]) > -1){
-            return false;
+            return [false, ''];
         }
     }
-    return true;
+    return [true, source];
 }
 
 var fn_map = {

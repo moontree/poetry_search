@@ -117,7 +117,7 @@
     var conditions = ["title", "main", "author", "dynasty", "grade", "seq_id", "comment"];
 
     function filter_query(){
-        let result = [...all_indexes];
+        let result = [...contents]; // copy item
         for(let i = 0; i < conditions.length; i ++){
             let tmp = [];
             let condition = conditions[i];
@@ -125,9 +125,15 @@
             if(f_query[1].length > 0) { // need filter
                 for (let j = 0; j < result.length; j++) {
                     let item = result[j];
-                    if (filter(f_query[0], contents[item][condition] || "", f_query[1])) {
+                    let res = filter(f_query[0], item[condition] || "", f_query[1]);
+
+                    if (res[0]) {
                         // tmp.push(item);
-                        tmp.push(contents[item]);
+                        console.log(res);
+                        result[j][condition] = res[1];
+                        console.log(result[j]);
+
+                        tmp.push(result[j]);
                     }
                 }
                 result = [...tmp];
@@ -155,10 +161,8 @@
     var table_data = [...contents];
     var result_table = $('#result_tb');
     function query(){
-        // clear_table();
         result_table.bootstrapTable('removeAll');
         table_data = filter_query();
-        // console.log(table_data);
         result_table.bootstrapTable('append', table_data);
     };
 
