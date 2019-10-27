@@ -21,8 +21,10 @@ function fn_have_all(source, target){
 
 function fn_exact_in(source, target){
     for(let i in target){
-        let new_str = source.replace(new RegExp(target[i], 'g'), '<strong style="background:yellow">' + target[i] + '</strong>');
-        return [true, new_str];
+        if(source === target[i]) {
+            let new_str = source.replace(new RegExp(target[i], 'g'), '<strong style="background:yellow">' + target[i] + '</strong>');
+            return [true, new_str];
+        }
     }
     return [false, ''];
 }

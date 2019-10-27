@@ -5,16 +5,21 @@
     <title>古诗词</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="js/jquery-3.4.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script src="js/bootstrap-table.min.js"></script>
+
     <script src="js/utils.js"></script>
     <script src="js/meta.js"></script>
+
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap-table.min.css">
 </head>
 <body>
-<br>
-<h1 class="text-center">古诗词查找</h1>
-<div style="padding: 20px 50px 10px;">
-    <h2>查询条件</h2>
-    <div>
+    <br>
+    <h1 class="text-center">古诗词查找</h1>
+    <div style="padding: 20px 50px 10px;">
+        <h2>查询条件</h2>
         <p>
             <label>题目</label>
             <select id="title_op">
@@ -51,7 +56,7 @@
             </select>
             <input id="author_text" placeholder="多个用空格分隔">
         </p>
-        <p>
+         <p>
             <label>朝代</label>
             <select id="dynasty_op">
                 <option selected value="equal">等于</option>
@@ -101,41 +106,18 @@
         </p>
         <button onclick='query()'>查询</button>
     </div>
-
-</div>
-<HR style="border: 3px double #987cb9">
-<div id="app">
-    <div v-for="(item, i) in arr" v-bind:class="arr" style="background-color:#F0EFE2; margin-top: 20px; border:1px solid #ccc; padding-bottom: 5px">
-        <h3 style="margin:5px 0 6px 0"> {{item.title}}
-            <img style="float:right" v-bind:index="i" v-on:click='textbookClick' src="sources/img/textbook_hidden.png" width="25" height="25" alt="背诵">
-            <img style="float:right" v-bind:index="i" v-on:click='commentClick' src="sources/img/comment_hidden.png" width="25" height="25" alt="赏析">
-            <img style="float:right" v-bind:index="i" v-on:click='annotateClick' src="sources/img/annotate_hidden.png" width="25" height="25" alt="注释">
-        </h3>
-        <h4 style="margin:5px 0 0 0"><span v-html="item.dynasty || '-'"></span> : <span v-html="item.author || '-'"></span> </h4>
-        <div class='content'  v-html="item.main" style="margin: 5px 0 0 5px"></div>
-        <div class='textbook' style="margin: 5px 0 0 5px; color: blue; background-color: lightgray; display: none">
-            所属教材：{{item.grade}}年级 - {{item.seq_id}} - 第 {{item.unit_num}} 单元 - 第 {{item.class_id}} 课 - {{item.class_title}}
-            <br>
-            出处：{{item.reference}}
-        </div>
-        <div class='annotate' style="margin: 5px 0 0 5px; color: yellow; background-color: darkgray; display: none">
-            <p>注解</p>
-            {{item.annotate}}
-        </div>
-        <div class='comment' style="margin: 5px 0 0 5px; color: mediumslateblue; background-color: lightgray; display: none">
-            <p>赏析</p>
-            {{item.comment}}
-        </div>
+    <HR style="border: 3px double #987cb9">
+    <div style="padding: 20px 50px 10px;">
+        <table id="result_tb"  class="flex-nowrap" width="100%"  style="table-layout:fixed"> </table>
     </div>
-
-</div>
 
 </body>
 <script type="text/javascript">
 
     var conditions = ["title", "main", "author", "dynasty", "grade", "seq_id", "comment"];
+
     function filter_query(){
-        let result = JSON.parse(JSON.stringify(contents)); // copy item
+        let result = [...contents]; // copy item
         for(let i = 0; i < conditions.length; i ++){
             let tmp = [];
             let condition = conditions[i];
@@ -144,8 +126,13 @@
                 for (let j = 0; j < result.length; j++) {
                     let item = result[j];
                     let res = filter(f_query[0], item[condition] || "", f_query[1]);
+
                     if (res[0]) {
+                        // tmp.push(item);
+                        console.log(res);
                         result[j][condition] = res[1];
+                        console.log(result[j]);
+
                         tmp.push(result[j]);
                     }
                 }
@@ -155,6 +142,7 @@
         }
         return result;
     }
+
     /**
      *
      * @param str
@@ -169,64 +157,74 @@
         return [filter_op, filter_target || []];
     };
 
+
+    var table_data = [...contents];
+    var result_table = $('#result_tb');
     function query(){
-        data_to_show = filter_query();
-        app.arr = data_to_show;
+        result_table.bootstrapTable('removeAll');
+        table_data = filter_query();
+        result_table.bootstrapTable('append', table_data);
     };
-    var data_to_show = contents.slice(0, 5);
-    var app = new Vue({
-        el: '#app',
-        data: {
-            count: data_to_show.length,
-            arr: data_to_show,
-            annotate_show: Array(contents.length).fill(false),
-            textbook_show: Array(contents.length).fill(false),
-            comment_show: Array(contents.length).fill(false)
-        },
-        methods:{
-            textbookClick: function(e) {
-                let idx = e.target.getAttribute("index" );
-                let target_div = $(e.target).parent().parent().children('.textbook');
-                if(this.textbook_show[idx]){
-                    this.textbook_show[idx] = false;
-                    e.target.setAttribute('src', "sources/img/textbook_hidden.png");
-                    target_div.css('display', 'none');
-                }else{
-                    this.textbook_show[idx] = true;
-                    e.target.setAttribute('src', "sources/img/textbook_show.png");
-                    target_div.css('display', 'block');
+
+    function init_table(){
+        result_table.bootstrapTable({
+            showColumns: true,
+            columns: [
+                {
+                    "field": "title",
+                    "title": "题目",
+                    "width": "100px",
+                }, {
+                    "field": "author",
+                    "title": "作者",
+                    "width": "50px"
+                }, {
+                    "field": "dynasty",
+                    "title": "朝代",
+                    "width": "50px"
+                }, {
+                    "field": "main",
+                    "title": "正文",
+                    "width": "400px"
+                }, {
+                    "field": "grade",
+                    "title": "年级",
+                    "width": "50px"
+                }, {
+                    "field": "seq_id",
+                    "title": "册数",
+                    "width": "50px"
+                }, {
+                    "field": "unit_num",
+                    "title": "单元",
+                    "width": "50px"
+                }, {
+                    "field": "class_id",
+                    "title": "课",
+                    "width": "50px"
+                }, {
+                    "field": "class_title",
+                    "title": "课题",
+                    "width": "120px"
+                }, {
+                    "field": "reference",
+                    "title": "出处",
+                    "width": "100px"
+                }, {
+                    "field": "annotate",
+                    "title": "注解",
+                    "width": "100px"
+                }, {
+                    "field": "comment",
+                    "title": "备注",
+                    "width": "100px"
                 }
-            },
-            commentClick: function(e) {
-                let idx = e.target.getAttribute( "index" );
-                let target_div = $(e.target).parent().parent().children('.comment');
-                if (this.comment_show[idx]) {
-                    this.comment_show[idx] = false;
-                    e.target.setAttribute('src', "sources/img/comment_hidden.png");
-                    target_div.css('display', 'none');
-                } else {
-                    this.comment_show[idx] = true;
-                    e.target.setAttribute('src', "sources/img/comment_show.png");
-                    target_div.css('display', 'block');
-                }
-            },
-            annotateClick: function(e) {
-                let idx = e.target.getAttribute( "index" );
-                let target_div = $(e.target).parent().parent().children('.annotate');
-                if (this.annotate_show[idx]) {
-                    this.annotate_show[idx] = false;
-                    e.target.setAttribute('src', "sources/img/annotate_hidden.png");
-                    target_div.css('display', 'none');
-                } else {
-                    this.annotate_show[idx] = true;
-                    e.target.setAttribute('src', "sources/img/annotate_show.png");
-                    target_div.css('display', 'block');
-                }
-            }
-        },
-        mounted: function(){
-            var self = this;
-        }
-    })
+            ],
+            data: table_data
+        });
+    }
+    $(document).ready(function() {
+        init_table();
+    });
 </script>
 </html>
