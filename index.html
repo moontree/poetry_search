@@ -12,7 +12,7 @@
 <body>
 <br>
 <h1 class="text-center">古诗词查找</h1>
-<div style="padding: 20px 50px 10px;">
+<div style="padding: 20px 50px 10px; background-color: lightgreen; margin-top: 20px; border:1px solid #ccc;">
     <h2>查询条件</h2>
     <div>
         <p>
@@ -30,10 +30,10 @@
         <p>
             <label>正文</label>
             <select id="main_op">
-                <option selected value="equal">等于</option>
+                <option value="equal">等于</option>
                 <option value="exact_in">在..里面(精确模式）</option>
                 <option value="exact_not_in">不在..里面（精确模式）</option>
-                <option value="have_either">包含某个</option>
+                <option selected value="have_either">包含某个</option>
                 <option value="have_all">包含所有</option>
                 <option value="not_have_all">不包含任何</option>
             </select>
@@ -106,13 +106,18 @@
 <HR style="border: 3px double #987cb9">
 <div id="app">
     <div v-for="(item, i) in arr" v-bind:class="arr" style="background-color:#F0EFE2; margin-top: 20px; border:1px solid #ccc; padding-bottom: 5px">
-        <h3 style="margin:5px 0 6px 0"> {{item.title}}
+        <div style="margin:5px 0 6px 0">
+            <span v-bind:index="i" v-html="item.sentences || item.title" v-on:click='mainClick'></span>
             <img style="float:right" v-bind:index="i" v-on:click='textbookClick' src="sources/img/textbook_hidden.png" width="25" height="25" alt="背诵">
             <img style="float:right" v-bind:index="i" v-on:click='commentClick' src="sources/img/comment_hidden.png" width="25" height="25" alt="赏析">
             <img style="float:right" v-bind:index="i" v-on:click='annotateClick' src="sources/img/annotate_hidden.png" width="25" height="25" alt="注释">
-        </h3>
-        <h4 style="margin:5px 0 0 0"><span v-html="item.dynasty || '-'"></span> : <span v-html="item.author || '-'"></span> </h4>
-        <div class='content'  v-html="item.main" style="margin: 5px 0 0 5px"></div>
+        </div>
+        <div class="detail" style="display: none;">
+            <h3 style="margin:5px 0 6px 0"> {{item.seq || item.title}}</h3>
+            <h4 style="margin:5px 0 0 0"><span v-html="item.dynasty || '-'"></span> : <span v-html="item.author || '-'"></span> </h4>
+            <div class='content'  v-html="item.main" style="margin: 5px 0 0 5px"></div>
+        </div>
+
         <div class='textbook' style="margin: 5px 0 0 5px; color: blue; background-color: lightgray; display: none">
             所属教材：{{item.grade}}年级 - {{item.seq_id}} - 第 {{item.unit_num}} 单元 - 第 {{item.class_id}} 课 - {{item.class_title}}
             <br>
@@ -146,6 +151,12 @@
                     let res = filter(f_query[0], item[condition] || "", f_query[1]);
                     if (res[0]) {
                         result[j][condition] = res[1];
+                        if(condition === 'main'){
+                            let sentences = item.main.replace(/<br>/g, '').replace(/？/g,'。').split("。").filter(function(sentence){
+                                return sentence.indexOf(f_query[1]) > -1;
+                            });
+                            item.sentences = sentences[0];
+                        }
                         tmp.push(result[j]);
                     }
                 }
@@ -181,7 +192,8 @@
             arr: data_to_show,
             annotate_show: Array(contents.length).fill(false),
             textbook_show: Array(contents.length).fill(false),
-            comment_show: Array(contents.length).fill(false)
+            comment_show: Array(contents.length).fill(false),
+            main_show: Array(contents.length).fill(false),
         },
         methods:{
             textbookClick: function(e) {
@@ -220,6 +232,18 @@
                 } else {
                     this.annotate_show[idx] = true;
                     e.target.setAttribute('src', "sources/img/annotate_show.png");
+                    target_div.css('display', 'block');
+                }
+            },
+            mainClick: function(e) {
+                let idx = e.target.getAttribute( "index" );
+                let target_div = $(e.target).parent().parent().children('.detail');
+                console.log(target_div);
+                if (this.main_show[idx]) {
+                    this.main_show[idx] = false;
+                    target_div.css('display', 'none');
+                } else {
+                    this.main_show[idx] = true;
                     target_div.css('display', 'block');
                 }
             }
